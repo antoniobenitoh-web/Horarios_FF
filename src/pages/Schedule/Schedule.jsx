@@ -288,7 +288,15 @@ export default function Schedule() {
                       <span className={styles.calendarDate} style={{ color: isSpecial ? specialColor : 'var(--text-primary)' }}>{dateNum}</span>
                       {!isSpecial ? (
                         <div className={styles.calendarEvent} style={{ '--event-color': cfg.color }}>
-                          <span className={styles.calendarHours}>{shift.horas}</span>
+                          {shift.horas && shift.horas.includes('/') ? (
+                            <div className={styles.calendarHoursSplit}>
+                              {shift.horas.split('/').map((part, pIdx) => (
+                                <span key={pIdx} className={styles.calendarHourLine}>{part.trim()}</span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className={styles.calendarHours}>{shift.horas}</span>
+                          )}
                           <span className={styles.calendarShift} style={{ color: cfg.color }}>{shiftType}</span>
                         </div>
                       ) : (
