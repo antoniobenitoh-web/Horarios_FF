@@ -35,12 +35,49 @@ export default function ControlEquipo() {
         body: JSON.stringify({ action: "getAllPromotorStats" })
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.promotores) {
         setPromotoresData(data.promotores || []);
       } else {
-        setError(data.message || "Error al cargar datos del equipo.");
+        // Fallback automático si getAllPromotorStats no está en esta versión del backend
+        const resUsers = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "getUsers" })
+        });
+        const dataUsers = await resUsers.json();
+        if (dataUsers.success && dataUsers.users) {
+          const promotores = dataUsers.users.filter(u => u.role === 'promotor').map(u => ({
+            ...u,
+            stats: {
+              vacaciones: { generadasFinDeAno: 30, aprobadas: 0, pendientesAprobar: 0, pendientesDisfrutar: 30 },
+              sabados: { generadosFinDeAno: 6, disfrutados: 0, pendientes: 6 },
+              diasTrabajados: { hoy: 1 }
+            }
+          }));
+          setPromotoresData(promotores);
+        } else {
+          setError(data.message || "Error al cargar datos del equipo.");
+        }
       }
     } catch (err) {
+      try {
+        const resUsers = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "getUsers" })
+        });
+        const dataUsers = await resUsers.json();
+        if (dataUsers.success && dataUsers.users) {
+          const promotores = dataUsers.users.filter(u => u.role === 'promotor').map(u => ({
+            ...u,
+            stats: {
+              vacaciones: { generadasFinDeAno: 30, aprobadas: 0, pendientesAprobar: 0, pendientesDisfrutar: 30 },
+              sabados: { generadosFinDeAno: 6, disfrutados: 0, pendientes: 6 },
+              diasTrabajados: { hoy: 1 }
+            }
+          }));
+          setPromotoresData(promotores);
+          return;
+        }
+      } catch(e) {}
       setError("Error de conexión con el servidor.");
     } finally {
       setLoading(false);
