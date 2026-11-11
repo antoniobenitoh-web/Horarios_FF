@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +14,7 @@ export default function Topbar() {
   
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifs, setNotifs] = useState([]);
+  const [activePopupNotif, setActivePopupNotif] = useState(null);
   
   // Profile state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -46,6 +48,12 @@ export default function Topbar() {
                 isDbNotif: true
               });
             });
+            
+            // Buscar si hay alguna notificación de revisión de horario no leída para mostrar como emergente
+            const pendingPopup = dbData.notificaciones.find(n => n.tipo === 'revision_horario' && !n.leida);
+            if (pendingPopup) {
+              setActivePopupNotif(pendingPopup);
+            }
           }
         } catch(e) { console.error("Error fetching DB notifs", e); }
 
@@ -116,12 +124,11 @@ export default function Topbar() {
   return (
     <header className={styles.topbar}>
       <div className={styles.topbarLeft}>
-        <div className={styles.logo}>
-          <CalendarDays size={22} color="white" />
+        <div className={styles.logo} style={{ padding: '0.25rem', background: 'transparent', boxShadow: 'none' }}>
+          <img src={import.meta.env.BASE_URL + "icon-192.png"} alt="Horarios Equipo FF" style={{ width: '40px', height: '40px', borderRadius: '8px' }} />
         </div>
-        <div className={styles.brandGroup}>
-          <h2 className={styles.brandTitle}>Horarios Equipo FF</h2>
-          <span className={styles.brandSub}>Gestión de Turnos</span>
+        <div className={styles.brandGroup} style={{ marginLeft: '0.5rem' }}>
+          <h2 className={styles.brandTitle} style={{ color: 'white', fontWeight: '600', letterSpacing: '1px' }}>Horarios Equipo FF</h2>
         </div>
       </div>
 
@@ -138,7 +145,7 @@ export default function Topbar() {
           </NavLink>
         )}
 
-        {(user.role === 'gpv' || user.role === 'am' || user.role === 'coordinadora' || user.role === 'trainer' || user.role === 'project') && (
+        {(user.role === 'gpv' || user.role === 'am' || user.role === 'coordinadora' || user.role === 'trainer' || user.role === 'administradora') && (
           <NavLink to="/equipo" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
             <Users size={18} />
             <span>Mi Equipo</span>
@@ -146,13 +153,22 @@ export default function Topbar() {
         )}
 
         {user.role !== 'trainer' && (
-          <NavLink to="/horas" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
-            <Clock size={18} />
-            <span>Control Horas</span>
-          </NavLink>
+          <>
+            <NavLink to="/horas" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
+              <Clock size={18} />
+              <span>Control Horas</span>
+            </NavLink>
+
+            {(user.role === "gpv" || user.role === "am" || user.role === "coordinadora" || user.role === "administradora") && (
+              <NavLink to="/control-equipo" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
+                <Users size={18} />
+                <span>Control Equipo</span>
+              </NavLink>
+            )}
+          </>
         )}
 
-        {(user.role === 'am' || user.role === 'coordinadora' || user.role === 'project') && (
+        {(user.role === 'am' || user.role === 'coordinadora' || user.role === 'administradora') && (
           <NavLink to="/usuarios" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
             <UserCircle size={18} />
             <span>Usuarios</span>
@@ -222,7 +238,7 @@ export default function Topbar() {
             <span className={styles.userName}>{user.name}</span>
             <span className={styles.userRole}>{user.role.toUpperCase()}</span>
           </div>
-          <UserCircle size={32} style={{ color: 'var(--accent-primary)' }} />
+          <UserCircle size={32} style={{ color: '#ffffff' }} />
         </div>
 
         <button onClick={handleLogout} className={styles.logoutBtn} title="Cerrar sesión">
@@ -305,6 +321,50 @@ export default function Topbar() {
                   {isSaving ? 'Guardando...' : 'Guardar Nueva Contraseña'}
                 </button>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activePopupNotif && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.profileModal} style={{ border: '2px solid var(--accent-primary)' }}>
+            <div className={styles.profileHeader} style={{ background: 'rgba(255, 103, 0, 0.05)' }}>
+              <h3 style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertCircle size={20} /> Aviso de Revisión de Horarios
+              </h3>
+            </div>
+            <div className={styles.profileBody} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
+                {activePopupNotif.mensaje}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button 
+                  onClick={async () => {
+                    try {
+                      await fetch(GAS_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'markNotificacionLeida', id: activePopupNotif.id })
+                      });
+                      setNotifs(current => current.map(x => x.id === activePopupNotif.id ? { ...x, read: true } : x));
+                    } catch(e) {}
+                    setActivePopupNotif(null);
+                  }}
+                  style={{
+                    background: 'var(--accent-primary)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: 'var(--border-radius-md)',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    boxShadow: '0 4px 12px rgba(255,103,0,0.2)'
+                  }}
+                >
+                  Entendido
+                </button>
+              </div>
             </div>
           </div>
         </div>

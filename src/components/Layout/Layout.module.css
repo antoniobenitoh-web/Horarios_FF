@@ -8,7 +8,7 @@
 /* Topbar with Navigation */
 .topbar {
   height: var(--topbar-height);
-  background-color: #111111;
+  background-color: var(--salesland-primary);
   border-bottom: 1px solid rgba(255, 103, 0, 0.15);
   display: flex;
   align-items: center;
@@ -19,8 +19,8 @@
   z-index: 10;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
   
-  color: var(--text-light-primary);
-  --text-primary: var(--text-light-primary);
+  color: var(--text-primary);
+  
   --text-secondary: var(--text-light-secondary);
   --text-tertiary: var(--text-light-tertiary);
 }
@@ -157,12 +157,12 @@
 .userName {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #ffffff;
 }
 
 .userRole {
   font-size: 0.65rem;
-  color: var(--accent-primary);
+  color: #e2e8f0;
   font-weight: 700;
   letter-spacing: 0.8px;
   text-transform: uppercase;
@@ -207,7 +207,7 @@
   top: calc(100% + 12px);
   right: 0;
   width: 340px;
-  background: #1a1a1a;
+  background: #ffffff;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--border-radius-lg);
   box-shadow: 0 16px 48px rgba(0,0,0,0.4);
@@ -317,7 +317,7 @@
 }
 
 .profileModal {
-  background: #1a1a1a;
+  background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
   width: 100%;
@@ -499,7 +499,7 @@
     left: 0;
     right: 0;
     height: 65px;
-    background: rgba(17, 17, 17, 0.95);
+    background: var(--salesland-primary);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-top: 1px solid rgba(255, 103, 0, 0.15);

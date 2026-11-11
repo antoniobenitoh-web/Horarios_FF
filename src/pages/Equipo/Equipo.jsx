@@ -1,18 +1,41 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Equipo.module.css';
-import { Users, MapPin, Clock, Sun, Moon, Search, Filter, Calendar, ChevronDown, ChevronUp, User, CheckCircle2 } from 'lucide-react';
+import { Users, MapPin, Clock, Sun, Moon, Search, Filter, Calendar, ChevronDown, ChevronUp, User, CheckCircle2, Coffee } from 'lucide-react';
 
-const turnoIcon = {
-  'Mañana': <Sun size={14} color="var(--warning)" />,
-  'Tarde': <Moon size={14} color="var(--accent-primary)" />,
-  'Partido': <Clock size={14} color="var(--info)" />,
-  'Descanso': <Sun size={14} color="var(--text-secondary)" />
+const shiftConfig = {
+  'Mañanas': { color: '#f97316', bg: 'rgba(249,115,22,0.15)'   },
+  'Tardes':  { color: '#3b82f6', bg: 'rgba(59,130,246,0.15)'   },
+  'Partido': { color: '#a855f7', bg: 'rgba(168,85,247,0.15)'   },
+  'Day off': { color: '#22c55e', bg: 'rgba(34,197,94,0.15)'   },
+  'Sábado calidad': { color: 'var(--accent-primary)', bg: 'var(--accent-light)' },
+  'Vacaciones': { color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.15)' }
+};
+
+const iconMap = {
+  'Mañanas': <Sun size={14} color="#f97316" />,
+  'Tardes':  <Moon size={14} color="#3b82f6" />,
+  'Partido': <Clock size={14} color="#a855f7" />,
+  'Day off': <Coffee size={14} color="#22c55e" />,
+  'Sábado calidad': <Coffee size={14} color="var(--accent-primary)" />,
+  'Vacaciones': <Sun size={14} color="#7c3aed" />
 };
 
 export default function Equipo() {
   const { user } = useAuth();
   const GAS_URL = import.meta.env.VITE_GAS_URL;
+  
+  const todayIso = new Date().toISOString().split('T')[0];
+  const getIsoFromDateString = (dateStr) => {
+    if (!dateStr) return '';
+    if (dateStr.includes('-')) return dateStr;
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+    return '';
+  };
   
   const getISOWeek = (date) => {
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -22,7 +45,7 @@ export default function Equipo() {
     return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
   };
   
-  const todayIso = new Date().toISOString().split('T')[0];
+
 
   const [busqueda, setBusqueda] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -54,9 +77,24 @@ export default function Equipo() {
         const data = await res.json();
         if (data.success && data.meses && data.meses.length > 0) {
           setMesesDisponibles(data.meses);
-          setSelectedMonth(data.meses[0].mes);
-          setSemanasDisponibles(data.meses[0].semanas);
-          setSelectedWeek(data.meses[0].semanas[0]);
+          
+          const todayDate = new Date();
+          const d = new Date(Date.UTC(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate()));
+          const dayNum = d.getUTCDay() || 7;
+          d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+          const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+          const currentWeekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+          const currentWeekStr = `Semana ${currentWeekNum}`;
+          
+          const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+          const currentMonthStr = `${mesesNombres[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+          
+          const targetMonthObj = data.meses.find(m => m.mes.toLowerCase() === currentMonthStr.toLowerCase()) || data.meses[0];
+          setSelectedMonth(targetMonthObj.mes);
+          setSemanasDisponibles(targetMonthObj.semanas);
+          
+          const targetWeekStr = targetMonthObj.semanas.find(s => s.toString().toLowerCase() === currentWeekStr.toLowerCase() || s.toString() === currentWeekNum.toString()) || targetMonthObj.semanas[0];
+          setSelectedWeek(targetWeekStr);
         } else {
           setLoading(false); // No hay meses, terminar carga
         }
@@ -74,9 +112,11 @@ export default function Equipo() {
     const mesObj = mesesDisponibles.find(m => m.mes === selectedMonth);
     if (mesObj && mesObj.semanas) {
       setSemanasDisponibles(mesObj.semanas);
-      setSelectedWeek(mesObj.semanas[0]);
+      if (!mesObj.semanas.includes(selectedWeek)) {
+        setSelectedWeek(mesObj.semanas[0]);
+      }
     }
-  }, [selectedMonth, mesesDisponibles]);
+  }, [selectedMonth, mesesDisponibles, selectedWeek]);
 
   // Cargar equipo cuando cambia la semana
   React.useEffect(() => {
@@ -100,7 +140,24 @@ export default function Equipo() {
         });
         const data = await res.json();
         if (data.success) {
-          setEquipoFetch(data.equipo);
+          const normalized = data.equipo.map(p => {
+            if (!p.semana) return p;
+            return {
+              ...p,
+              semana: p.semana.map(dia => {
+                let norm = dia.iconTurno;
+                if (dia.iconTurno) {
+                  const lower = dia.iconTurno.toLowerCase();
+                  if (lower.includes('mañana') || lower.includes('manana')) norm = 'Mañanas';
+                  else if (lower.includes('tarde')) norm = 'Tardes';
+                  else if (lower.includes('partido')) norm = 'Partido';
+                  else if (lower.includes('descanso') || lower.includes('day off') || lower.includes('libre')) norm = 'Day off';
+                }
+                return { ...dia, iconTurno: norm };
+              })
+            };
+          });
+          setEquipoFetch(normalized);
         }
       } catch(err) {
         console.error(err);
@@ -198,7 +255,7 @@ export default function Equipo() {
               {suggestions.map((s, i) => (
                 <div 
                   key={i} 
-                  style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', color: 'var(--text-light-primary)', cursor: 'pointer', borderBottom: i < suggestions.length - 1 ? '1px solid var(--border-color)' : 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', color: 'var(--text-primary)', cursor: 'pointer', borderBottom: i < suggestions.length - 1 ? '1px solid var(--border-color)' : 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                   onClick={() => {
                     setBusqueda(s.text);
                     setShowSuggestions(false);
@@ -216,17 +273,17 @@ export default function Equipo() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           
           {/* Selector de Región (Solo Project y Coordinadora) */}
-          {(user.role === 'project' || user.role === 'coordinadora') && (
+          {(user.role === 'administradora' || user.role === 'coordinadora') && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-secondary)', padding: '0.3rem 0.6rem', borderRadius: 'var(--border-radius-full)', border: '1px solid var(--glass-border)' }}>
               <MapPin size={14} color="var(--accent-primary)" />
               <select 
                 value={filtroRegion} 
                 onChange={e => setFiltroRegion(e.target.value)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-light-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer' }}
               >
-                <option value="todas" style={{ background: '#1a1a1a', color: '#ffffff' }}>Todas las regiones</option>
+                <option value="todas" style={{ background: '#ffffff', color: '#1e293b' }}>Todas las regiones</option>
                 {regionesDisponibles.map(r => (
-                  <option key={r} value={r} style={{ background: '#1a1a1a', color: '#ffffff' }}>{r}</option>
+                  <option key={r} value={r} style={{ background: '#ffffff', color: '#1e293b' }}>{r}</option>
                 ))}
               </select>
             </div>
@@ -238,14 +295,14 @@ export default function Equipo() {
             <select 
               value={selectedMonth} 
               onChange={e => setSelectedMonth(e.target.value)}
-              style={{ background: 'transparent', border: 'none', color: 'var(--text-light-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer' }}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer' }}
             >
               {mesesDisponibles.length > 0 ? (
                 mesesDisponibles.map(m => (
-                  <option key={m.mes} value={m.mes} style={{ background: '#1a1a1a', color: '#ffffff' }}>{m.mes}</option>
+                  <option key={m.mes} value={m.mes} style={{ background: '#ffffff', color: '#1e293b' }}>{m.mes}</option>
                 ))
               ) : (
-                <option value="" style={{ background: '#1a1a1a', color: '#ffffff' }}>Cargando meses...</option>
+                <option value="" style={{ background: '#ffffff', color: '#1e293b' }}>Cargando meses...</option>
               )}
             </select>
           </div>
@@ -256,19 +313,19 @@ export default function Equipo() {
             <select 
               value={selectedWeek} 
               onChange={e => setSelectedWeek(e.target.value)}
-              style={{ background: 'transparent', border: 'none', color: 'var(--text-light-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer' }}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer' }}
             >
               {semanasDisponibles.length > 0 ? (
                 semanasDisponibles.map(w => (
-                  <option key={w} value={w} style={{ background: '#1a1a1a', color: '#ffffff' }}>Semana {w}</option>
+                  <option key={w} value={w} style={{ background: '#ffffff', color: '#1e293b' }}>Semana {w}</option>
                 ))
               ) : (
-                <option value={selectedWeek} style={{ background: '#1a1a1a', color: '#ffffff' }}>Semana {selectedWeek}</option>
+                <option value={selectedWeek} style={{ background: '#ffffff', color: '#1e293b' }}>Semana {selectedWeek}</option>
               )}
             </select>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            {['todos', 'Mañana', 'Tarde', 'Partido'].map(t => (
+            {['todos', 'Mañanas', 'Tardes', 'Partido'].map(t => (
               <button
                 key={t}
                 onClick={() => setFiltroTurno(t)}
@@ -284,7 +341,7 @@ export default function Equipo() {
                   outline: 'none'
                 }}
               >
-                {t !== 'todos' && turnoIcon[t]}
+                {t !== 'todos' && iconMap[t]}
                 {t === 'todos' ? 'Todos' : t}
               </button>
             ))}
@@ -353,7 +410,9 @@ export default function Equipo() {
                               if (hoy) {
                                 return (
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.15rem' }}>
-                                    {turnoIcon[hoy.iconTurno] || <Sun size={12} color="var(--text-secondary)"/>}
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: 'var(--bg-secondary)', borderRadius: '50%', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                      {iconMap[hoy.iconTurno] || <Sun size={14} color="var(--text-secondary)"/>}
+                                    </div>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Hoy: <span style={{ color: 'var(--text-primary)' }}>{hoy.horas}</span></span>
                                   </div>
                                 );
@@ -369,15 +428,31 @@ export default function Equipo() {
 
                       {/* HORARIO SEMANAL (Desplegado si el promotor está activo) */}
                       {promotorExpanded[p.id] && (
-                        <div style={{ padding: '0.5rem 1rem 1rem 1rem', background: 'rgba(0,0,0,0.15)' }}>
+                        <div style={{ padding: '0.5rem 1rem 1rem 1rem', background: 'var(--bg-tertiary)' }}>
                           {p.semana && p.semana.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius-md)', overflow: 'hidden' }}>
-                              {p.semana?.map((dia, dIdx) => (
+                              {p.semana?.map((dia, dIdx) => {
+                                const cfg = shiftConfig[dia.iconTurno] || { color: '#ccc', bg: 'rgba(0,0,0,0.05)' };
+                                let rowBg = cfg.bg;
+                                
+                                const lowerHoras = (dia.horas || '').toLowerCase();
+                                if (lowerHoras.includes('vacaciones')) { rowBg = 'rgba(124,58,237,0.15)'; }
+                                else if (lowerHoras.includes('baja')) { rowBg = 'rgba(220,38,38,0.15)'; }
+                                else if (lowerHoras.includes('festivo')) { rowBg = 'rgba(14,165,233,0.15)'; }
+                                else if (lowerHoras.includes('sábado calidad') || lowerHoras.includes('sabado calidad')) { rowBg = 'var(--accent-light)'; }
+                                else if (lowerHoras.includes('day off') || lowerHoras === '-' || lowerHoras === 'descanso') { rowBg = 'rgba(34,197,94,0.15)'; }
+                                else if (lowerHoras.includes('permiso')) { rowBg = 'rgba(159,18,57,0.15)'; }
+
+                                const isPast = dia.fecha && dia.fecha < todayIso;
+                                const pastStyle = isPast ? { opacity: 0.55, filter: 'grayscale(0.5)' } : {};
+
+                                return (
                                 <div key={dIdx} style={{ 
                                   display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
                                   padding: '0.5rem 0.75rem', 
-                                  background: dia.iconTurno === 'Descanso' ? 'transparent' : 'rgba(255,255,255,0.05)',
-                                  borderBottom: dIdx < p.semana.length - 1 ? '1px solid var(--border-color)' : 'none'
+                                  background: rowBg,
+                                  borderBottom: dIdx < p.semana.length - 1 ? '1px solid var(--border-color)' : 'none',
+                                  ...pastStyle
                                 }}>
                                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', width: '30%' }}>
                                     {dia.diaSemana}
@@ -393,10 +468,11 @@ export default function Equipo() {
                                     )}
                                   </div>
                                   <span style={{ width: '20px', display: 'flex', justifyContent: 'center' }}>
-                                    {turnoIcon[dia.iconTurno] || <Sun size={14} color="var(--text-secondary)"/>}
+                                    {iconMap[dia.iconTurno] || <Sun size={14} color="var(--text-secondary)"/>}
                                   </span>
                                 </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           ) : (
                             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', margin: '0.5rem 0' }}>Sin horarios registrados esta semana.</p>

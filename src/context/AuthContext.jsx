@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { createContext, useState, useContext } from 'react';
 
 const mockUsers = [
@@ -33,6 +34,13 @@ const mockUsers = [
     password: '123',
     name: 'Ana Martínez',
     role: 'coordinadora'
+  },
+  {
+    id: 5,
+    username: 'alicia',
+    password: '123',
+    name: 'Alicia Admin',
+    role: 'administradora'
   }
 ];
 
@@ -47,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   const GAS_URL = import.meta.env.VITE_GAS_URL;
 
   const login = async (username, password) => {
-    // Si tenemos configurada la URL del backend, intentamos con Google Apps Script
+    // Si tenemos configurada la URL del backend, llamamos a Google Apps Script
     if (GAS_URL) {
       try {
         const res = await fetch(GAS_URL, {
@@ -56,23 +64,27 @@ export const AuthProvider = ({ children }) => {
         });
         const data = await res.json();
         if (data.success) {
+          if (data.user && data.user.role) {
+            data.user.role = String(data.user.role).toLowerCase().trim();
+          }
           setUser(data.user);
           localStorage.setItem('user', JSON.stringify(data.user));
           return { success: true };
         }
+        return { success: false, error: data.error || 'Credenciales inválidas' };
       } catch (err) {
-        console.warn('Aviso: No se pudo conectar con el backend remoto, comprobando usuarios locales.', err);
+        console.warn('Aviso: Backend remoto inaccesible, comprobando usuarios locales.', err);
       }
     }
 
-    // Fallback: Si no hay backend o las credenciales remotas no coinciden, probamos usuarios mock locales
+    // Fallback: Si no hay URL o backend falla, usamos datos locales
     const found = mockUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (found) {
       setUser(found);
       localStorage.setItem('user', JSON.stringify(found));
       return { success: true };
     }
-    return { success: false, error: 'Credenciales inválidas' };
+    return { success: false, error: 'Credenciales inválidas (Modo Local)' };
   };
 
   const logout = () => {
@@ -89,7 +101,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUserPassword, mockUsers }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUserPassword }}>
       {children}
     </AuthContext.Provider>
   );

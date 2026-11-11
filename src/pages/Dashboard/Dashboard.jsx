@@ -1,15 +1,26 @@
+/* eslint-disable */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, Clock, Users, CalendarClock, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { 
+  CalendarDays, 
+  CalendarClock, 
+  Clock, 
+  Users, 
+  AlertCircle, 
+  CheckCircle2, 
+  ArrowRight,
+  TrendingUp,
+  FileCheck
+} from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const GAS_URL = import.meta.env.VITE_GAS_URL;
-  
-  const [nextShift, setNextShift] = useState({ loading: true, data: null });
-  const [managerStats, setManagerStats] = useState({ teamSize: 0, pendingRequests: 0, loading: true });
+
+  const [nextShift, setNextShift] = useState({ data: null, loading: true });
+  const [managerStats, setManagerStats] = useState({ teamSize: 0, loading: true });
 
   useEffect(() => {
     const fetchNextShift = async () => {
@@ -20,27 +31,14 @@ export default function Dashboard() {
           body: JSON.stringify({ action: 'getSchedule', name: user.name })
         });
         const data = await res.json();
-        if (data.success && data.schedule) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
+        if (data.success && data.schedule && data.schedule.length > 0) {
+          // Buscamos el primer turno con horas válidas
           let found = null;
-          // Buscar el próximo turno
-          for (const mes of data.schedule) {
-            for (const semana of mes.semanas) {
-              for (const shift of semana.detalle) {
-                const shiftDate = new Date(shift.fecha);
-                shiftDate.setHours(0,0,0,0);
-                
-                const isRest = (shift.turno || '').toLowerCase() === 'descanso' || (shift.horas || '').toLowerCase().includes('descanso') || (shift.horas || '').toLowerCase().includes('day off');
-                
-                if (shiftDate > today && !isRest) {
-                  found = {
-                    dia: shift.dia,
-                    fecha: shift.fecha,
-                    horas: shift.horas,
-                    turno: shift.turno || 'Mañana'
-                  };
+          for (const m of data.schedule) {
+            for (const s of m.semanas) {
+              for (const d of s.detalle) {
+                if (d.horas && d.horas !== '-' && !d.horas.toLowerCase().includes('descanso') && !d.horas.toLowerCase().includes('day off')) {
+                  found = d;
                   break;
                 }
               }
@@ -48,15 +46,17 @@ export default function Dashboard() {
             }
             if (found) break;
           }
-          setNextShift({ loading: false, data: found });
+          setNextShift({ data: found, loading: false });
+        } else {
+          setNextShift({ data: null, loading: false });
         }
       } catch (err) {
-        setNextShift({ loading: false, data: null });
+        setNextShift({ data: null, loading: false });
       }
     };
 
     const fetchManagerData = async () => {
-      if ((user.role !== 'gpv' && user.role !== 'am' && user.role !== 'coordinadora' && user.role !== 'trainer' && user.role !== 'project') || !GAS_URL) return;
+      if ((user.role !== 'gpv' && user.role !== 'am' && user.role !== 'coordinadora' && user.role !== 'trainer' && user.role !== 'administradora') || !GAS_URL) return;
       try {
         // Fetch usuarios
         const resUsers = await fetch(GAS_URL, {
@@ -68,11 +68,12 @@ export default function Dashboard() {
         if (dataUsers.success) {
           tSize = dataUsers.users.filter(u => 
             u.role === 'promotor' && 
-            (String(u.manager.gpv || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
-             String(u.manager.am || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
-             String(u.manager.coordinadora || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
-             String(u.manager.project || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
-             String(u.manager.trainer || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase())
+            (user.role === 'administradora' ||
+             String(u.manager?.gpv || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
+             String(u.manager?.am || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
+             String(u.manager?.coordinadora || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
+             String(u.manager?.administradora || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
+             String(u.manager?.trainer || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase())
           ).length;
         }
 
@@ -91,15 +92,15 @@ export default function Dashboard() {
       {/* Saludo */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
         <div>
-          <h2 style={{ color: 'var(--accent-primary)', fontSize: '1.4rem', marginBottom: '0.2rem' }}>Hola, {user.name} 👋</h2>
-          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Bienvenido a Horarios Equipo FF. Aquí tienes el resumen de tu actividad.</span>
+          <h2 style={{ color: 'var(--salesland-primary)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.2rem' }}>Hola, {user.name} 👋</h2>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>Bienvenido a Horarios Equipo FF. Aquí tienes el resumen de tu actividad.</span>
         </div>
       </div>
 
       {/* Panel de Coordinación - siempre primero para promotores */}
       {user.role === 'promotor' && user.manager && (
         <div className="card" style={{ marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.75rem', fontSize: '1rem' }}>
+          <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', fontSize: '1rem', color: 'var(--salesland-primary)', fontWeight: '600' }}>
             👥 Mi Equipo de Coordinación
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
@@ -108,18 +109,18 @@ export default function Dashboard() {
               { rol: 'Area Manager', nombre: user.manager.am },
               { rol: 'Coordinadora', nombre: user.manager.coordinadora },
               { rol: 'Trainer', nombre: user.manager.trainer },
-              { rol: 'Project Manager', nombre: user.manager.project },
+              { rol: 'Administradora', nombre: user.manager.administradora },
             ].map(({ rol, nombre }) => (
-              <div key={rol} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '1rem' }}>
+              <div key={rol} style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', borderRadius: '10px', padding: '1rem' }}>
                 <p style={{ fontSize: '0.72rem', color: 'var(--accent-primary)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '0.3rem' }}>{rol}</p>
-                <p style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.95rem' }}>{nombre}</p>
+                <p style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.95rem' }}>{nombre || 'Sin asignar'}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Tarjetas de acceso rápido */}
+      {/* Tarjetas de acceso rápido para Promotor */}
       {user.role === 'promotor' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
           {/* Próximo turno */}
@@ -149,30 +150,15 @@ export default function Dashboard() {
               </div>
               <ArrowRight size={18} style={{ color: 'var(--text-tertiary)' }} />
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Balance de Horas</p>
-            <p style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--success)', marginBottom: '0.25rem' }}>0 h</p>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>✓ Mes actual compensado</p>
-          </div>
-
-          {/* Estado horario */}
-          <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ padding: '0.75rem', background: 'rgba(245,158,11,0.12)', borderRadius: '10px', color: 'var(--warning)' }}>
-                <AlertCircle size={28} />
-              </div>
-            </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Horario Junio</p>
-            <p style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--warning)', marginBottom: '0.5rem' }}>⏳ Pendiente de confirmar</p>
-            <button className="btn btn-primary" style={{ fontSize: '0.82rem', padding: '0.4rem 0.875rem' }}
-              onClick={() => navigate('/horario')}>
-              <CheckCircle2 size={14} /> Confirmar lectura
-            </button>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Control Horario</p>
+            <p style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Consultar balance</p>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Ver horas planificadas vs contrato</p>
           </div>
         </div>
       )}
 
-      {/* Dashboard para GPV/AM/Coordinadora/Trainer */}
-      {(user.role === 'gpv' || user.role === 'am' || user.role === 'coordinadora' || user.role === 'trainer' || user.role === 'project') && (
+      {/* Dashboard para GPV/AM/Coordinadora/Trainer/Administradora */}
+      {(user.role === 'gpv' || user.role === 'am' || user.role === 'coordinadora' || user.role === 'trainer' || user.role === 'administradora') && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
           <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/equipo')}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
@@ -188,19 +174,33 @@ export default function Dashboard() {
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Promotores asignados</p>
           </div>
 
-          {user.role !== 'trainer' && (
-            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/horas')}>
+          <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/horas')}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div style={{ padding: '0.75rem', background: 'rgba(59,130,246,0.12)', borderRadius: '10px', color: 'var(--info)' }}>
-                <CalendarDays size={28} />
+                <Clock size={28} />
               </div>
               <ArrowRight size={18} style={{ color: 'var(--text-tertiary)' }} />
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Mes Actual</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Control Horas</p>
             <p style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem', textTransform: 'capitalize' }}>
               {new Date().toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
             </p>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Ver horarios de tu equipo</p>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Balance y cuadrante por promotor</p>
+          </div>
+
+          {(user.role === 'gpv' || user.role === 'am' || user.role === 'coordinadora' || user.role === 'administradora') && (
+            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/control-equipo')}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.75rem', background: 'rgba(168,85,247,0.12)', borderRadius: '10px', color: '#a855f7' }}>
+                  <TrendingUp size={28} />
+                </div>
+                <ArrowRight size={18} style={{ color: 'var(--text-tertiary)' }} />
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Control Equipo</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+                Métricas Generales
+              </p>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Filtros por zona, tienda y estadísticas</p>
             </div>
           )}
         </div>

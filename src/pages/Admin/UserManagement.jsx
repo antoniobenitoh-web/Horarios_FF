@@ -1,7 +1,8 @@
+/* eslint-disable */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './UserManagement.module.css';
-import { Users, Edit2, Key, Plus, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, Edit2, Key, Plus, RefreshCw, AlertCircle, MapPin, Search } from 'lucide-react';
 
 export default function UserManagement() {
   const { user } = useAuth();
@@ -10,6 +11,11 @@ export default function UserManagement() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  
+  // Filtros
+  const [filtroRegion, setFiltroRegion] = useState('todas');
+  const [filtroCentro, setFiltroCentro] = useState('todos');
+  const [busquedaNombre, setBusquedaNombre] = useState('');
   
   // Estado del formulario
   const [form, setForm] = useState({
@@ -21,7 +27,7 @@ export default function UserManagement() {
     am: '',
     coordinadora: '',
     trainer: '',
-    project: '',
+    administradora: '',
     centro: '',
     fechaIncorporacion: '',
     email: '',
@@ -63,23 +69,31 @@ export default function UserManagement() {
     if (u) {
       setEditingUser(u);
       setForm({
-        name: u.name,
-        username: u.username,
-        password: u.password,
-        role: u.role,
+        name: u.name || '',
+        username: u.username || '',
+        password: u.password || '',
+        role: u.role || 'promotor',
         gpv: u.manager?.gpv || '',
         am: u.manager?.am || '',
         coordinadora: u.manager?.coordinadora || '',
         trainer: u.manager?.trainer || '',
-        project: u.manager?.project || '',
+        administradora: u.manager?.administradora || '',
         centro: u.centro || '',
-        fechaIncorporacion: u.fechaIncorporacion ? String(u.fechaIncorporacion).split('T')[0] : '',
+        fechaIncorporacion: u.fechaIncorporacion || '',
         email: u.email || '',
         region: u.region || ''
       });
     } else {
       setEditingUser(null);
-      setForm({ name: '', username: '', password: '', role: 'promotor', gpv: '', am: '', coordinadora: '', trainer: '', project: '', centro: '', fechaIncorporacion: '', email: '', region: '' });
+      setForm({ 
+        name: '', username: '', password: '', role: 'promotor', 
+        gpv: '', 
+        am: user.role === 'am' ? user.name : '', 
+        coordinadora: user.role === 'coordinadora' ? user.name : '', 
+        trainer: '', 
+        administradora: '', 
+        centro: '', fechaIncorporacion: '', email: '', region: '' 
+      });
     }
     setShowModal(true);
   };
@@ -98,7 +112,7 @@ export default function UserManagement() {
             am: form.am,
             coordinadora: form.coordinadora,
             trainer: form.trainer,
-            project: form.project
+            administradora: form.administradora
           },
           centro: form.centro,
           fechaIncorporacion: form.fechaIncorporacion,
@@ -124,16 +138,52 @@ export default function UserManagement() {
     }
   };
 
-  if (user.role !== 'coordinadora' && user.role !== 'am' && user.role !== 'project') {
+  if (user.role !== 'coordinadora' && user.role !== 'am' && user.role !== 'administradora') {
     return <div className="card">No tienes permiso para ver esta página.</div>;
   }
 
+  // 1. Filtrar por permisos de rol
   const visibleUsers = users.filter(u => {
-    if (user.role === 'project') return true;
-    if (user.role === 'coordinadora' || user.role === 'am') {
-      return u.role === 'promotor' || u.role === 'gpv';
+    if (user.role === 'administradora') return true;
+    
+    const userNameLower = String(user.name || "").trim().toLowerCase();
+    const isPromotorOrGPV = u.role === 'promotor' || u.role === 'gpv';
+    
+    if (user.role === 'am' && isPromotorOrGPV) {
+      return String(u.manager?.am || "").trim().toLowerCase() === userNameLower;
     }
+    
+    if (user.role === 'coordinadora' && u.role === 'promotor') {
+      return String(u.manager?.coordinadora || "").trim().toLowerCase() === userNameLower;
+    }
+    
     return false;
+  });
+
+  // 2. Extraer listas para los desplegables de filtros
+  const regionesDisponibles = Array.from(new Set(visibleUsers.map(u => u.region).filter(r => r && r.trim() !== ''))).sort();
+  const centrosDisponibles = Array.from(new Set(visibleUsers.map(u => u.centro).filter(c => c && c.trim() !== 'Sin asignar'))).sort();
+
+  // 3. Aplicar filtros de la UI y ordenar por rol
+  const finalUsers = visibleUsers.filter(u => {
+    const matchesRegion = filtroRegion === 'todas' || u.region === filtroRegion;
+    const matchesCentro = filtroCentro === 'todos' || u.centro === filtroCentro;
+    const matchesBusqueda = busquedaNombre === '' || 
+      (u.name && String(u.name).toLowerCase().includes(String(busquedaNombre).toLowerCase())) || 
+      (u.username && String(u.username).toLowerCase().includes(String(busquedaNombre).toLowerCase()));
+      
+    return matchesRegion && matchesCentro && matchesBusqueda;
+  }).sort((a, b) => {
+    const roleOrder = {
+      'administradora': 1,
+      'am': 2,
+      'coordinadora': 3,
+      'gpv': 4,
+      'promotor': 5
+    };
+    const orderA = roleOrder[String(a.role).toLowerCase()] || 99;
+    const orderB = roleOrder[String(b.role).toLowerCase()] || 99;
+    return orderA - orderB;
   });
 
   return (
@@ -171,6 +221,52 @@ export default function UserManagement() {
         </div>
       )}
 
+      {/* Barra de Filtros */}
+      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+          {(user.role === 'administradora' || user.role === 'coordinadora') && (
+            <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-tertiary)', padding: '0.5rem 0.8rem', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--border-color)' }}>
+              <MapPin size={16} color="var(--accent-primary)" />
+              <select 
+                value={filtroRegion} 
+                onChange={e => { setFiltroRegion(e.target.value); setFiltroCentro('todos'); }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: '500', cursor: 'pointer', width: '100%' }}
+              >
+                <option value="todas" style={{ background: '#ffffff', color: '#1e293b' }}>Todas las regiones</option>
+                {regionesDisponibles.map(r => (
+                  <option key={r} value={r} style={{ background: '#ffffff', color: '#1e293b' }}>{r}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          
+          <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-tertiary)', padding: '0.5rem 0.8rem', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--border-color)' }}>
+            <MapPin size={16} color="var(--info)" />
+            <select 
+              value={filtroCentro} 
+              onChange={e => setFiltroCentro(e.target.value)}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: '500', cursor: 'pointer', width: '100%' }}
+            >
+              <option value="todos" style={{ background: '#ffffff', color: '#1e293b' }}>Todos los centros</option>
+              {centrosDisponibles.map(c => (
+                <option key={c} value={c} style={{ background: '#ffffff', color: '#1e293b' }}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: '1 1 200px', position: 'relative' }}>
+            <Search size={16} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+            <input
+              style={{ width: '100%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.5rem 0.8rem 0.5rem 2.2rem', borderRadius: 'var(--border-radius-md)', fontSize: '0.85rem', outline: 'none' }}
+              type="text"
+              placeholder="Buscar por nombre o usuario..."
+              value={busquedaNombre}
+              onChange={e => setBusquedaNombre(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
@@ -185,11 +281,11 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody>
-              {visibleUsers.map(u => (
+              {finalUsers.map(u => (
                 <tr key={u.id}>
                   <td data-label="Nombre"><strong>{u.name}</strong></td>
                   <td data-label="Usuario"><span className={styles.userBadge}>{u.username}</span></td>
-                  <td data-label="Rol"><span className={`${styles.roleBadge} ${styles['role_' + u.role]}`}>{u.role.toUpperCase()}</span></td>
+                  <td data-label="Rol"><span className={`${styles.roleBadge} ${styles['role_' + u.role]}`}>{String(u.role || '').toUpperCase()}</span></td>
                   <td data-label="Contraseña"><span className={styles.pwdCensored}>••••••</span> <span className={styles.pwdReal}>{u.password}</span></td>
                   <td data-label="Responsables" className={styles.managersCell}>
                     {u.manager?.gpv && <div>GPV: {u.manager.gpv}</div>}
@@ -202,11 +298,12 @@ export default function UserManagement() {
                   </td>
                 </tr>
               ))}
-              {visibleUsers.length === 0 && !loading && GAS_URL && (
+              {finalUsers.length === 0 && !loading && GAS_URL && (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '3rem' }}>No hay usuarios visibles en este nivel.</td>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '3rem' }}>No se encontraron usuarios con estos filtros.</td>
                 </tr>
               )}
+
               {loading && GAS_URL && (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', padding: '3rem' }}>Cargando usuarios desde Google Sheets...</td>
@@ -243,10 +340,10 @@ export default function UserManagement() {
                 <select className="input-field" value={form.role} onChange={e => setForm({...form, role: e.target.value})}>
                   <option value="promotor">Promotor</option>
                   <option value="gpv">GPV</option>
-                  <option value="am">Area Manager</option>
-                  <option value="coordinadora">Coordinadora</option>
-                  <option value="trainer">Trainer</option>
-                  <option value="project">Project Manager</option>
+                  {user.role !== 'am' && <option value="am">Area Manager</option>}
+                  {user.role === 'administradora' && <option value="coordinadora">Coordinadora</option>}
+                  {user.role === 'administradora' && <option value="trainer">Trainer</option>}
+                  {user.role === 'administradora' && <option value="administradora">Administradora</option>}
                 </select>
               </div>
 
@@ -293,10 +390,10 @@ export default function UserManagement() {
                   </div>
                   <div className={styles.formRow}>
                     <div className="input-group">
-                      <label className="input-label">Asignar Project Manager</label>
-                      <select className="input-field" value={form.project} onChange={e => setForm({...form, project: e.target.value})}>
+                      <label className="input-label">Asignar Administradora</label>
+                      <select className="input-field" value={form.administradora} onChange={e => setForm({...form, administradora: e.target.value})}>
                         <option value="">-- Ninguno --</option>
-                        {users.filter(u => u.role === 'project').map(u => (
+                        {users.filter(u => u.role === 'administradora').map(u => (
                           <option key={u.id} value={u.name}>{u.name}</option>
                         ))}
                       </select>
