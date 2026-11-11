@@ -177,14 +177,14 @@ export default function Schedule() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${viewMode === 'monthly' ? styles.containerMonthly : ''}`}>
 
-      <div className={styles.header} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className={styles.header}>
         <div>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', fontSize: '1.4rem', marginBottom: '0.2rem' }}>
-            <CalendarDays size={24} /> Mi Horario
+          <h2 className={styles.pageTitle}>
+            <CalendarDays size={22} /> Mi Horario
           </h2>
-          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Consulta tus turnos y confirma la recepción</span>
+          <span className={styles.pageSub}>Consulta tus turnos y confirma la recepción</span>
         </div>
 
         {user.role === 'promotor' && currentWeekData && viewMode === 'weekly' && (
@@ -207,27 +207,36 @@ export default function Schedule() {
         )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem', marginBottom: '1rem' }}>
-        <div className={styles.viewToggleGroup}>
-          <button className={`${styles.viewToggleBtn} ${viewMode === 'monthly' ? styles.viewToggleBtnActive : ''}`} onClick={() => handleViewModeChange('monthly')}>
+      {/* Selector de Vista (Mensual / Semanal) y Navegación de Mes en una sola barra horizontal */}
+      <div className={styles.scheduleControlBar}>
+        <div className={styles.viewToggle}>
+          <button 
+            type="button"
+            className={`${styles.viewToggleBtn} ${viewMode === 'monthly' ? styles.viewToggleBtnActive : ''}`} 
+            onClick={() => handleViewModeChange('monthly')}
+          >
             <Calendar size={14} /> Mensual
           </button>
-          <button className={`${styles.viewToggleBtn} ${viewMode === 'weekly' ? styles.viewToggleBtnActive : ''}`} onClick={() => handleViewModeChange('weekly')}>
+          <button 
+            type="button"
+            className={`${styles.viewToggleBtn} ${viewMode === 'weekly' ? styles.viewToggleBtnActive : ''}`} 
+            onClick={() => handleViewModeChange('weekly')}
+          >
             <CalendarDays size={14} /> Semanal
           </button>
         </div>
-      </div>
 
-      <div className={styles.monthSelector} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', background: '#ffffff', padding: '0.6rem', borderRadius: 'var(--border-radius-full)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '1rem', width: 'fit-content', margin: '0 auto 1rem auto' }}>
-        <button type="button" onClick={handlePrevMonth} disabled={currentMonthIndex <= 0} style={{ background: 'transparent', border: 'none', color: currentMonthIndex <= 0 ? 'rgba(0,0,0,0.1)' : 'var(--salesland-primary)', cursor: currentMonthIndex <= 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
-          <ChevronLeft size={18} />
-        </button>
-        <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--accent-primary)', minWidth: '100px', textAlign: 'center' }}>
-          {activeMonth || 'Mes Actual'}
-        </span>
-        <button type="button" onClick={handleNextMonth} disabled={currentMonthIndex >= horarioMes.length - 1} style={{ background: 'transparent', border: 'none', color: currentMonthIndex >= horarioMes.length - 1 ? 'rgba(0,0,0,0.1)' : 'var(--salesland-primary)', cursor: currentMonthIndex >= horarioMes.length - 1 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
-          <ChevronRight size={18} />
-        </button>
+        <div className={styles.monthSelectorPill}>
+          <button type="button" onClick={handlePrevMonth} disabled={currentMonthIndex <= 0} className={styles.monthArrowBtn}>
+            <ChevronLeft size={16} />
+          </button>
+          <span className={styles.monthPillText}>
+            {activeMonth || 'Mes Actual'}
+          </span>
+          <button type="button" onClick={handleNextMonth} disabled={currentMonthIndex >= horarioMes.length - 1} className={styles.monthArrowBtn}>
+            <ChevronRight size={16} />
+          </button>
+        </div>
       </div>
 
       {loading && <div className="card">Cargando horario desde Google Sheets...</div>}
@@ -238,8 +247,8 @@ export default function Schedule() {
         <div className={styles.calendarContainer}>
           {user.role === 'promotor' && (
              <div className={styles.monthlyWarning}>
-               <AlertTriangle size={20} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
-               <span>Para confirmar tu horario, debes cambiar a la vista <strong>Semanal</strong> y revisar cada semana.</span>
+               <AlertTriangle size={15} color="var(--accent-primary)" style={{ flexShrink: 0 }} />
+               <span>Para confirmar tu horario, cambia a la vista <strong>Semanal</strong>.</span>
              </div>
           )}
           <div className={styles.calendarHeader}>

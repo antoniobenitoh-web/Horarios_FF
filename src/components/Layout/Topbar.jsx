@@ -124,11 +124,11 @@ export default function Topbar() {
   return (
     <header className={styles.topbar}>
       <div className={styles.topbarLeft}>
-        <div className={styles.logo} style={{ padding: '0.25rem', background: 'transparent', boxShadow: 'none' }}>
-          <img src={import.meta.env.BASE_URL + "icon-192.png"} alt="Horarios Equipo FF" style={{ width: '40px', height: '40px', borderRadius: '8px' }} />
+        <div className={styles.logo}>
+          <img src={import.meta.env.BASE_URL + "icon-192.png"} alt="Horarios Equipo FF" className={styles.logoImg} />
         </div>
-        <div className={styles.brandGroup} style={{ marginLeft: '0.5rem' }}>
-          <h2 className={styles.brandTitle} style={{ color: 'white', fontWeight: '600', letterSpacing: '1px' }}>Horarios Equipo FF</h2>
+        <div className={styles.brandGroup}>
+          <h2 className={styles.brandTitle}>Horarios Equipo FF</h2>
         </div>
       </div>
 
