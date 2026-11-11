@@ -89,7 +89,7 @@ export default function ControlHoras() {
               u.role === 'promotor' && 
               (String(u.manager?.gpv || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
                String(u.manager?.am || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
-               String(u.manager?.administradora || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() ||
+               String(u.manager?.administradora || u.manager?.project || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() ||
                String(u.manager?.trainer || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() ||
                String(u.manager?.coordinadora || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase())
             );

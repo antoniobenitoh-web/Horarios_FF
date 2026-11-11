@@ -11,7 +11,9 @@ const mockUsers = [
     manager: {
       gpv: 'María García',
       am: 'Carlos López',
-      coordinadora: 'Ana Martínez'
+      coordinadora: 'Ana Martínez',
+      administradora: 'Alicia Muruzabal',
+      project: 'Alicia Muruzabal'
     }
   },
   {
@@ -49,7 +51,17 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.manager) {
+        parsed.manager.administradora = parsed.manager.administradora || parsed.manager.project || '';
+        parsed.manager.project = parsed.manager.project || parsed.manager.administradora || '';
+      }
+      return parsed;
+    } catch (e) {
+      return null;
+    }
   });
 
   const GAS_URL = import.meta.env.VITE_GAS_URL;
@@ -66,6 +78,10 @@ export const AuthProvider = ({ children }) => {
         if (data.success) {
           if (data.user && data.user.role) {
             data.user.role = String(data.user.role).toLowerCase().trim();
+          }
+          if (data.user && data.user.manager) {
+            data.user.manager.administradora = data.user.manager.administradora || data.user.manager.project || '';
+            data.user.manager.project = data.user.manager.project || data.user.manager.administradora || '';
           }
           setUser(data.user);
           localStorage.setItem('user', JSON.stringify(data.user));

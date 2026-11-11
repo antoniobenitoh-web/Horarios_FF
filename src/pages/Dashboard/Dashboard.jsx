@@ -13,7 +13,7 @@ import {
   TrendingUp,
   FileCheck
 } from 'lucide-react';
-import { detectTurno } from '../../utils/turnoUtils';
+import { detectTurno, shiftConfig } from '../../utils/turnoUtils';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -32,14 +32,46 @@ export default function Dashboard() {
           body: JSON.stringify({ action: 'getSchedule', name: user.name })
         });
         const data = await res.json();
+
+        // Calculamos la fecha de mañana (día siguiente al actual)
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const yyyy = tomorrow.getFullYear();
+        const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const dd = String(tomorrow.getDate()).padStart(2, '0');
+        const tomorrowIso = `${yyyy}-${mm}-${dd}`;
+
+        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const diaNombreManana = `${diasSemana[tomorrow.getDay()]} ${tomorrow.getDate()}`;
+
+        const normalizeDateStr = (f) => {
+          if (!f) return '';
+          if (typeof f === 'string') {
+            const isoMatch = f.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (isoMatch) return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+            const dmyMatch = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (dmyMatch) return `${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`;
+          }
+          try {
+            const dt = new Date(f);
+            if (!isNaN(dt.getTime())) {
+              const y = dt.getFullYear();
+              const m = String(dt.getMonth() + 1).padStart(2, '0');
+              const d = String(dt.getDate()).padStart(2, '0');
+              return `${y}-${m}-${d}`;
+            }
+          } catch (e) {}
+          return String(f).trim();
+        };
+
         if (data.success && data.schedule && data.schedule.length > 0) {
-          // Buscamos el primer turno con horas válidas
+          // Buscamos específicamente el turno del día siguiente
           let found = null;
           for (const m of data.schedule) {
-            for (const s of m.semanas) {
-              for (const d of s.detalle) {
-                if (d.horas && d.horas !== '-' && !d.horas.toLowerCase().includes('descanso') && !d.horas.toLowerCase().includes('day off')) {
-                  found = d;
+            for (const s of (m.semanas || [])) {
+              for (const d of (s.detalle || [])) {
+                if (normalizeDateStr(d.fecha) === tomorrowIso) {
+                  found = { ...d };
                   break;
                 }
               }
@@ -47,12 +79,39 @@ export default function Dashboard() {
             }
             if (found) break;
           }
+
           if (found) {
-            found = { ...found, turno: detectTurno(found.horas, found.turno) };
+            const detected = detectTurno(found.horas, found.turno);
+            found = {
+              ...found,
+              turno: detected,
+              config: shiftConfig[detected] || {
+                label: detected,
+                color: 'var(--accent-primary)',
+                bg: 'var(--accent-light)'
+              }
+            };
+          } else {
+            found = {
+              dia: diaNombreManana,
+              fecha: tomorrowIso,
+              horas: 'Sin turno programado',
+              turno: 'Day off',
+              config: shiftConfig['Day off']
+            };
           }
           setNextShift({ data: found, loading: false });
         } else {
-          setNextShift({ data: null, loading: false });
+          setNextShift({ 
+            data: {
+              dia: diaNombreManana,
+              fecha: tomorrowIso,
+              horas: 'Sin turno programado',
+              turno: 'Day off',
+              config: shiftConfig['Day off']
+            }, 
+            loading: false 
+          });
         }
       } catch (err) {
         setNextShift({ data: null, loading: false });
@@ -76,7 +135,7 @@ export default function Dashboard() {
              String(u.manager?.gpv || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
              String(u.manager?.am || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
              String(u.manager?.coordinadora || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
-             String(u.manager?.administradora || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
+             String(u.manager?.administradora || u.manager?.project || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase() || 
              String(u.manager?.trainer || "").trim().toLowerCase() === String(user.name || "").trim().toLowerCase())
           ).length;
         }
@@ -113,7 +172,7 @@ export default function Dashboard() {
               { rol: 'Area Manager', nombre: user.manager.am },
               { rol: 'Coordinadora', nombre: user.manager.coordinadora },
               { rol: 'Trainer', nombre: user.manager.trainer },
-              { rol: 'Administradora', nombre: user.manager.administradora },
+              { rol: 'Administradora', nombre: user.manager.administradora || user.manager.project },
             ].map(({ rol, nombre }) => (
               <div key={rol} style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', borderRadius: '10px', padding: '1rem' }}>
                 <p style={{ fontSize: '0.72rem', color: 'var(--accent-primary)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '0.3rem' }}>{rol}</p>
@@ -135,15 +194,40 @@ export default function Dashboard() {
               </div>
               <ArrowRight size={18} style={{ color: 'var(--text-tertiary)' }} />
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Próximo Turno</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Próximo Turno (Mañana)</p>
             {nextShift.loading ? (
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Cargando turno...</p>
             ) : nextShift.data ? (
-              <p style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{nextShift.data.dia}, {nextShift.data.horas}</p>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+                  <p style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
+                    {nextShift.data.dia} · {nextShift.data.horas}
+                  </p>
+                  {nextShift.data.config && (
+                    <span style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '4px', 
+                      padding: '2px 8px', 
+                      borderRadius: '12px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: '700',
+                      background: nextShift.data.config.bg, 
+                      color: nextShift.data.config.color,
+                      border: `1px solid ${nextShift.data.config.color}33`
+                    }}>
+                      {nextShift.data.config.icon}
+                      {nextShift.data.config.label}
+                    </span>
+                  )}
+                </div>
+              </div>
             ) : (
               <p style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Sin turnos programados</p>
             )}
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>📍 {user.centro || 'Centro no asignado'}</p>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
+              📍 {nextShift.data?.centroAsignado || user.centro || 'Centro no asignado'}
+            </p>
           </div>
 
           {/* Balance de horas */}

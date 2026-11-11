@@ -50,7 +50,15 @@ export default function UserManagement() {
       });
       const data = await res.json();
       if (data.success) {
-        setUsers(data.users);
+        const normalized = (data.users || []).map(u => ({
+          ...u,
+          manager: {
+            ...u.manager,
+            administradora: u.manager?.administradora || u.manager?.project || '',
+            project: u.manager?.project || u.manager?.administradora || ''
+          }
+        }));
+        setUsers(normalized);
       } else {
         throw new Error(data.error);
       }
@@ -77,7 +85,7 @@ export default function UserManagement() {
         am: u.manager?.am || '',
         coordinadora: u.manager?.coordinadora || '',
         trainer: u.manager?.trainer || '',
-        administradora: u.manager?.administradora || '',
+        administradora: u.manager?.administradora || u.manager?.project || '',
         centro: u.centro || '',
         fechaIncorporacion: u.fechaIncorporacion || '',
         email: u.email || '',
@@ -112,7 +120,8 @@ export default function UserManagement() {
             am: form.am,
             coordinadora: form.coordinadora,
             trainer: form.trainer,
-            administradora: form.administradora
+            administradora: form.administradora,
+            project: form.administradora
           },
           centro: form.centro,
           fechaIncorporacion: form.fechaIncorporacion,
@@ -290,6 +299,7 @@ export default function UserManagement() {
                   <td data-label="Responsables" className={styles.managersCell}>
                     {u.manager?.gpv && <div>GPV: {u.manager.gpv}</div>}
                     {u.manager?.am && <div>AM: {u.manager.am}</div>}
+                    {(u.manager?.administradora || u.manager?.project) && <div>Admin: {u.manager.administradora || u.manager.project}</div>}
                   </td>
                   <td data-label="Acciones">
                     <button className={styles.actionBtn} onClick={() => handleOpenModal(u)} title="Editar usuario">

@@ -136,3 +136,4 @@ export const shiftIconMap = {
   'Sábado calidad': <Coffee size={14} color="var(--accent-primary)" />,
   'Vacaciones': <Sun size={14} color="#7c3aed" />
 };
+
