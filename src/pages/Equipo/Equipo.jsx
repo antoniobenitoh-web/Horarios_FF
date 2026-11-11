@@ -3,24 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Equipo.module.css';
 import { Users, MapPin, Clock, Sun, Moon, Search, Filter, Calendar, ChevronDown, ChevronUp, User, CheckCircle2, Coffee } from 'lucide-react';
-
-const shiftConfig = {
-  'Mañanas': { color: '#f97316', bg: 'rgba(249,115,22,0.15)'   },
-  'Tardes':  { color: '#3b82f6', bg: 'rgba(59,130,246,0.15)'   },
-  'Partido': { color: '#a855f7', bg: 'rgba(168,85,247,0.15)'   },
-  'Day off': { color: '#22c55e', bg: 'rgba(34,197,94,0.15)'   },
-  'Sábado calidad': { color: 'var(--accent-primary)', bg: 'var(--accent-light)' },
-  'Vacaciones': { color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.15)' }
-};
-
-const iconMap = {
-  'Mañanas': <Sun size={14} color="#f97316" />,
-  'Tardes':  <Moon size={14} color="#3b82f6" />,
-  'Partido': <Clock size={14} color="#a855f7" />,
-  'Day off': <Coffee size={14} color="#22c55e" />,
-  'Sábado calidad': <Coffee size={14} color="var(--accent-primary)" />,
-  'Vacaciones': <Sun size={14} color="#7c3aed" />
-};
+import { detectTurno, shiftConfig, shiftIconMap as iconMap } from '../../utils/turnoUtils';
 
 export default function Equipo() {
   const { user } = useAuth();
@@ -145,14 +128,7 @@ export default function Equipo() {
             return {
               ...p,
               semana: p.semana.map(dia => {
-                let norm = dia.iconTurno;
-                if (dia.iconTurno) {
-                  const lower = dia.iconTurno.toLowerCase();
-                  if (lower.includes('mañana') || lower.includes('manana')) norm = 'Mañanas';
-                  else if (lower.includes('tarde')) norm = 'Tardes';
-                  else if (lower.includes('partido')) norm = 'Partido';
-                  else if (lower.includes('descanso') || lower.includes('day off') || lower.includes('libre')) norm = 'Day off';
-                }
+                const norm = detectTurno(dia.horas, dia.iconTurno || dia.turno);
                 return { ...dia, iconTurno: norm };
               })
             };

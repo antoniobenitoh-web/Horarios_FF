@@ -13,6 +13,7 @@ import {
   TrendingUp,
   FileCheck
 } from 'lucide-react';
+import { detectTurno } from '../../utils/turnoUtils';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -45,6 +46,9 @@ export default function Dashboard() {
               if (found) break;
             }
             if (found) break;
+          }
+          if (found) {
+            found = { ...found, turno: detectTurno(found.horas, found.turno) };
           }
           setNextShift({ data: found, loading: false });
         } else {

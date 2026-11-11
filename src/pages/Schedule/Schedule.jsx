@@ -3,26 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Schedule.module.css';
 import { ChevronLeft, ChevronRight, CheckCircle2, Calendar, MapPin, Clock, Sun, Moon, Coffee, CalendarDays, AlertTriangle } from 'lucide-react';
-
-const shiftConfig = {
-  'Mañanas':  { icon: <Sun size={15} />,     color: '#f97316', bg: 'rgba(249,115,22,0.15)'   },
-  'Tardes':   { icon: <Moon size={15} />,    color: '#3b82f6', bg: 'rgba(59,130,246,0.15)'   },
-  'Partido':  { icon: <Clock size={15} />,   color: '#a855f7', bg: 'rgba(168,85,247,0.15)'   },
-  'Day off': { icon: <Coffee size={15} />,  color: '#22c55e', bg: 'rgba(34,197,94,0.15)'   },
-  'Sábado calidad': { icon: <Coffee size={15} />, color: 'var(--accent-primary)', bg: 'var(--accent-light)' },
-  'Vacaciones': { icon: <Sun size={15} />, color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.15)' }
-};
-
-const normalizeTurno = (t) => {
-  if (!t) return null;
-  const l = t.toLowerCase().trim();
-  if (l.includes('mañana')) return 'Mañanas';
-  if (l.includes('tarde')) return 'Tardes';
-  if (l.includes('partido')) return 'Partido';
-  if (l.includes('day off') || l.includes('descanso')) return 'Day off';
-  if (l.includes('sábado calidad') || l.includes('sabado calidad')) return 'Sábado calidad';
-  return null;
-};
+import { detectTurno, shiftConfig } from '../../utils/turnoUtils';
 
 export default function Schedule() {
   const { user } = useAuth();
@@ -270,13 +251,7 @@ export default function Schedule() {
             {currentMonthData.semanas.map((week, wIdx) => (
               <div key={week.id} className={styles.calendarRow}>
                 {week.detalle.map((shift, dIdx) => {
-                  let shiftType = normalizeTurno(shift.turno);
-                  if (!shiftType) { 
-                    shiftType = 'Mañanas';
-                    if (shift.horas === 'Day off' || shift.horas === '-' || shift.horas === 'Descanso') shiftType = 'Day off';
-                    if (shift.horas.toLowerCase().includes('sábado calidad') || shift.horas.toLowerCase().includes('sabado calidad')) shiftType = 'Sábado calidad';
-                  }
-                  
+                  const shiftType = detectTurno(shift.horas, shift.turno);
                   const cfg = shiftConfig[shiftType] || shiftConfig['Day off'];
                   
                   const isIso = shift.fecha.includes('-');
@@ -368,13 +343,7 @@ export default function Schedule() {
             </div>
 
             {currentWeekData?.detalle?.map((shift, idx) => {
-              let shiftType = normalizeTurno(shift.turno);
-              if (!shiftType) { 
-                shiftType = 'Mañanas';
-                if (shift.horas === 'Day off' || shift.horas === '-' || shift.horas === 'Descanso') shiftType = 'Day off';
-                if (shift.horas.toLowerCase().includes('sábado calidad') || shift.horas.toLowerCase().includes('sabado calidad')) shiftType = 'Sábado calidad';
-              }
-              
+              const shiftType = detectTurno(shift.horas, shift.turno);
               const cfg = shiftConfig[shiftType] || shiftConfig['Day off'];
               const isRest = shiftType === 'Day off' || shiftType === 'Sábado calidad' || shift.horas.toLowerCase().includes('day off') || shift.horas.toLowerCase().includes('descanso');
 
