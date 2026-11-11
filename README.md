@@ -1,16 +1,53 @@
-# React + Vite
+# Horarios Equipo FF
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web progresiva (PWA) para la gestión y consulta de horarios, control de jornadas y supervisión de equipos de trabajo para **Equipo FF**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Características Principales
 
-## React Compiler
+- **Gestión de Horarios y Turnos**: Cuadrante interactivo, lectura obligatoria y firma de conformidad de horarios publicados.
+- **Jerarquía y Control de Acceso (RBAC)**:
+  - **Promotor**: Consulta de turnos asignados, firma de conformidad y control de horas.
+  - **GPV**: Supervisión de promotores de su zona y seguimiento de conformidades.
+  - **AM (Area Manager)**: Visión multizona, seguimiento de equipos y balance horario.
+  - **Coordinadora**: Control total sobre planificación, gestión de altas/bajas de usuarios y reseteo de claves.
+- **Control de Horas**: Comparativa visual de horas planificadas frente a horas de contrato (déficit y exceso).
+- **Directorio de Equipo**: Ficha de centros, promotores y responsables asignados.
+- **Soporte PWA**: Instalable en dispositivos móviles y de escritorio como aplicación nativa.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Stack Tecnológico
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend**: React 19, React Router 7, Vite 8, CSS Modules, Lucide React (iconografía).
+- **PWA**: `vite-plugin-pwa` con service worker y soporte offline.
+- **Backend / Persistencia**: Google Apps Script (integrado con Google Sheets) mediante API REST (`VITE_GAS_URL`).
+
+---
+
+## 💻 Desarrollo Local
+
+### Requisitos
+- Node.js (v18+)
+- npm
+
+### Instalación y Ejecución
+```bash
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+
+# Compilar para producción
+npm run build
+
+# Previsualizar compilación de producción
+npm run preview
+```
+
+### Variables de Entorno (`.env` / `.env.local`)
+```env
+VITE_GAS_URL=https://script.google.com/macros/s/<ID_DEPLOYMENT>/exec
+```
