@@ -630,21 +630,46 @@
   text-overflow: ellipsis;
 }
 
+.calendarHoursContinuous {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+}
+
+.timeStart, .timeEnd {
+  white-space: nowrap;
+}
+
+.timeDash {
+  color: var(--text-tertiary);
+  font-size: 0.7rem;
+}
+
 .calendarHoursSplit {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   width: 100%;
   align-items: center;
 }
 
-.calendarHourLine {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-  line-height: 1.15;
+.calendarSplitBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #7e22ce;
+  background: rgba(168, 85, 247, 0.14);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 4px;
+  padding: 1px 3px;
+  width: 100%;
   text-align: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  display: block;
 }
 
 .calendarShift {
@@ -749,72 +774,101 @@
   }
 
   .calendarContainer {
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin: 0 -0.5rem;
+    width: calc(100% + 1rem);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     border: 1px solid rgba(0,0,0,0.08);
   }
 
   .calendarHeaderDay {
-    font-size: 0.62rem;
-    padding: 0.28rem 0.1rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.65rem;
+    padding: 0.35rem 0.1rem;
+    font-weight: 700;
   }
 
   .calendarCell {
-    min-height: 68px;
-    height: auto;
-    padding: 3px 1px;
-    gap: 2px;
+    min-height: 86px;
+    height: 86px;
+    padding: 4px 2px;
+    gap: 3px;
     overflow: hidden;
     justify-content: flex-start;
+    display: flex;
+    flex-direction: column;
   }
 
   .calendarDate {
-    font-size: 0.74rem;
-    font-weight: 700;
+    font-size: 0.8rem;
+    font-weight: 800;
     line-height: 1;
     margin-bottom: 2px;
+    padding-left: 2px;
     color: var(--text-primary) !important;
   }
 
   .calendarEvent {
-    padding: 2px 1px;
+    padding: 3px 2px;
     border-left: none !important;
-    border-top: 2px solid var(--event-color, transparent);
+    border-top: 3px solid var(--event-color, transparent);
     align-items: center;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.95);
+    border-radius: 4px;
+    background: #ffffff;
     width: 100%;
     box-sizing: border-box;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
 
-  .calendarHours {
-    font-size: 0.56rem;
-    font-weight: 600;
-    line-height: 1.15;
-    text-align: center;
+  /* Franja continua en móvil: Start en línea 1, guión, End en línea 2 */
+  .calendarHoursContinuous {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.05;
+    gap: 0;
+    width: 100%;
+  }
+
+  .timeStart, .timeEnd {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-primary);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
   }
 
+  .timeDash {
+    font-size: 0.52rem;
+    color: var(--text-tertiary);
+    line-height: 0.7;
+    margin: 0;
+  }
+
+  /* Horario partido en móvil: dos pastillas violetas completas */
   .calendarHoursSplit {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 3px;
     width: 100%;
     align-items: center;
   }
 
-  .calendarHourLine {
-    font-size: 0.54rem;
-    font-weight: 600;
-    line-height: 1.15;
-    text-align: center;
-    white-space: nowrap;
+  .calendarSplitBadge {
+    font-size: 0.52rem;
+    font-weight: 800;
     letter-spacing: -0.3px;
-    color: var(--text-primary);
+    white-space: nowrap;
+    background: rgba(168, 85, 247, 0.16);
+    color: #6b21a8;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    border-radius: 3px;
+    padding: 2px 1px;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    display: block;
+    line-height: 1.15;
   }
 
   .calendarShift {
@@ -822,21 +876,23 @@
   }
 
   .calendarSpecial {
-    padding: 2px 1px;
-    min-height: 26px;
+    padding: 4px 2px;
+    min-height: 40px;
     height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 4px;
   }
 
   .calendarSpecialText {
-    font-size: 0.54rem;
+    font-size: 0.58rem;
     line-height: 1.15;
     text-align: center;
     white-space: normal;
     word-break: break-word;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.2px;
   }
 }
 

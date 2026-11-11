@@ -5,6 +5,38 @@ import styles from './Schedule.module.css';
 import { ChevronLeft, ChevronRight, CheckCircle2, Calendar, MapPin, Clock, Sun, Moon, Coffee, CalendarDays, AlertTriangle } from 'lucide-react';
 import { detectTurno, shiftConfig } from '../../utils/turnoUtils';
 
+function renderShiftDisplay(horas, styles) {
+  if (!horas) return null;
+  const raw = String(horas).trim();
+
+  // Caso 1: Horario Partido (ej. "10:00-14:00 / 17:00-21:00")
+  if (raw.includes('/')) {
+    const parts = raw.split('/').map(p => p.trim());
+    return (
+      <div className={styles.calendarHoursSplit}>
+        {parts.map((p, i) => (
+          <span key={i} className={styles.calendarSplitBadge}>{p}</span>
+        ))}
+      </div>
+    );
+  }
+
+  // Caso 2: Franja continua (ej. "09:00-17:00" o "13:00-21:00")
+  if (raw.includes('-')) {
+    const [start, end] = raw.split('-').map(p => p.trim());
+    return (
+      <div className={styles.calendarHoursContinuous}>
+        <span className={styles.timeStart}>{start}</span>
+        <span className={styles.timeDash}>-</span>
+        <span className={styles.timeEnd}>{end}</span>
+      </div>
+    );
+  }
+
+  // Caso 3: Texto general
+  return <span className={styles.calendarHours}>{raw}</span>;
+}
+
 export default function Schedule() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('Semana 1');
@@ -288,15 +320,7 @@ export default function Schedule() {
                       <span className={styles.calendarDate} style={{ color: isSpecial ? specialColor : 'var(--text-primary)' }}>{dateNum}</span>
                       {!isSpecial ? (
                         <div className={styles.calendarEvent} style={{ '--event-color': cfg.color }}>
-                          {shift.horas && shift.horas.includes('/') ? (
-                            <div className={styles.calendarHoursSplit}>
-                              {shift.horas.split('/').map((part, pIdx) => (
-                                <span key={pIdx} className={styles.calendarHourLine}>{part.trim()}</span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className={styles.calendarHours}>{shift.horas}</span>
-                          )}
+                          {renderShiftDisplay(shift.horas, styles)}
                           <span className={styles.calendarShift} style={{ color: cfg.color }}>{shiftType}</span>
                         </div>
                       ) : (
