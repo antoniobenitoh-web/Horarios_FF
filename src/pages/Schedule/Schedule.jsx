@@ -11,7 +11,7 @@ function renderShiftDisplay(horas, styles) {
 
   // Caso 1: Horario Partido (ej. "10:00-14:00 / 17:00-21:00")
   if (raw.includes('/')) {
-    const parts = raw.split('/').map(p => p.trim());
+    const parts = raw.split('/').map(p => p.trim().replace(/\s+/g, '')).filter(Boolean);
     return (
       <div className={styles.calendarHoursSplit}>
         {parts.map((p, i) => (

@@ -774,8 +774,8 @@
   }
 
   .calendarContainer {
-    margin: 0 -0.5rem;
-    width: calc(100% + 1rem);
+    margin: 0 -0.65rem;
+    width: calc(100% + 1.3rem);
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     border: 1px solid rgba(0,0,0,0.08);
@@ -790,7 +790,7 @@
   .calendarCell {
     min-height: 86px;
     height: 86px;
-    padding: 4px 2px;
+    padding: 3px 1px;
     gap: 3px;
     overflow: hidden;
     justify-content: flex-start;
@@ -808,7 +808,7 @@
   }
 
   .calendarEvent {
-    padding: 3px 2px;
+    padding: 2px 1px;
     border-left: none !important;
     border-top: 3px solid var(--event-color, transparent);
     align-items: center;
@@ -849,26 +849,27 @@
   .calendarHoursSplit {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     width: 100%;
     align-items: center;
   }
 
   .calendarSplitBadge {
-    font-size: 0.52rem;
-    font-weight: 800;
-    letter-spacing: -0.3px;
+    font-size: clamp(0.40rem, 2.0vw, 0.45rem);
+    font-weight: 700;
+    letter-spacing: -0.45px;
     white-space: nowrap;
     background: rgba(168, 85, 247, 0.16);
     color: #6b21a8;
     border: 1px solid rgba(168, 85, 247, 0.35);
     border-radius: 3px;
-    padding: 2px 1px;
+    padding: 2px 0px;
     width: 100%;
     text-align: center;
     box-sizing: border-box;
     display: block;
     line-height: 1.15;
+    overflow: visible;
   }
 
   .calendarShift {
