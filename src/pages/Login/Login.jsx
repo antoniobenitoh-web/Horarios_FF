@@ -28,8 +28,8 @@ export default function Login() {
           <div className={styles.logo}>
             <CalendarDays size={32} color="white" />
           </div>
-          <p className={styles.brandSubtitle}>Xiaomi · Salesland</p>
-          <h1>Portal Promotores</h1>
+          <p className={styles.brandSubtitle}>Equipo FF</p>
+          <h1>Horarios Equipo FF</h1>
           <p>Inicia sesión en tu cuenta</p>
         </div>
 
@@ -72,6 +72,46 @@ export default function Login() {
             Acceder
           </button>
         </form>
+
+        <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textAlign: 'center' }}>
+            Acceso Rápido Demo (Contraseña: 123)
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.75rem', padding: '0.4rem 0.5rem' }}
+              onClick={() => { setUsername('juan'); setPassword('123'); }}
+            >
+              👤 Promotor (juan)
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.75rem', padding: '0.4rem 0.5rem' }}
+              onClick={() => { setUsername('maria'); setPassword('123'); }}
+            >
+              👔 GPV (maria)
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.75rem', padding: '0.4rem 0.5rem' }}
+              onClick={() => { setUsername('carlos'); setPassword('123'); }}
+            >
+              📊 AM (carlos)
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.75rem', padding: '0.4rem 0.5rem' }}
+              onClick={() => { setUsername('ana'); setPassword('123'); }}
+            >
+              ⭐ Coordinadora (ana)
+            </button>
+          </div>
+        </div>
 
         <div className={styles.footer}>
           <p>¿Problemas para iniciar sesión? Contacta a tu AM o Coordinadora.</p>

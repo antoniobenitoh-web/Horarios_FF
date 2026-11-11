@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   const GAS_URL = import.meta.env.VITE_GAS_URL;
 
   const login = async (username, password) => {
-    // Si tenemos configurada la URL del backend, llamamos a Google Apps Script
+    // Si tenemos configurada la URL del backend, intentamos con Google Apps Script
     if (GAS_URL) {
       try {
         const res = await fetch(GAS_URL, {
@@ -60,20 +60,19 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('user', JSON.stringify(data.user));
           return { success: true };
         }
-        return { success: false, error: data.error || 'Credenciales inválidas' };
       } catch (err) {
-        return { success: false, error: 'Error conectando con el servidor' };
+        console.warn('Aviso: No se pudo conectar con el backend remoto, comprobando usuarios locales.', err);
       }
     }
 
-    // Fallback: Si no hay URL, usamos los datos simulados por ahora
-    const found = mockUsers.find(u => u.username === username && u.password === password);
+    // Fallback: Si no hay backend o las credenciales remotas no coinciden, probamos usuarios mock locales
+    const found = mockUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (found) {
       setUser(found);
       localStorage.setItem('user', JSON.stringify(found));
       return { success: true };
     }
-    return { success: false, error: 'Credenciales inválidas (Modo Local)' };
+    return { success: false, error: 'Credenciales inválidas' };
   };
 
   const logout = () => {

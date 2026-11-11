@@ -76,18 +76,7 @@ export default function Dashboard() {
           ).length;
         }
 
-        // Fetch solicitudes
-        const resSols = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'getSolicitudes', username: user.username, role: user.role, name: user.name })
-        });
-        const dataSols = await resSols.json();
-        let pending = 0;
-        if (dataSols.success) {
-          pending = dataSols.solicitudes.filter(s => s.estado === 'pendiente').length;
-        }
-
-        setManagerStats({ teamSize: tSize, pendingRequests: pending, loading: false });
+        setManagerStats({ teamSize: tSize, loading: false });
       } catch (err) {
         setManagerStats(prev => ({ ...prev, loading: false }));
       }
@@ -103,7 +92,7 @@ export default function Dashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
         <div>
           <h2 style={{ color: 'var(--accent-primary)', fontSize: '1.4rem', marginBottom: '0.2rem' }}>Hola, {user.name} 👋</h2>
-          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Bienvenido al portal de promotores. Aquí tienes el resumen de tu actividad.</span>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Bienvenido a Horarios Equipo FF. Aquí tienes el resumen de tu actividad.</span>
         </div>
       </div>
 
@@ -198,22 +187,6 @@ export default function Dashboard() {
             </p>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Promotores asignados</p>
           </div>
-
-          {user.role !== 'trainer' && (
-            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/solicitudes')}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ padding: '0.75rem', background: 'rgba(245,158,11,0.12)', borderRadius: '10px', color: 'var(--warning)' }}>
-                <CalendarClock size={28} />
-              </div>
-              <ArrowRight size={18} style={{ color: 'var(--text-tertiary)' }} />
-            </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Solicitudes Pendientes</p>
-            <p style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--warning)', marginBottom: '0.25rem' }}>
-              {managerStats.loading ? '...' : managerStats.pendingRequests}
-            </p>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Requieren atención</p>
-            </div>
-          )}
 
           {user.role !== 'trainer' && (
             <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/horas')}>

@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'APP Horarios',
-        short_name: 'Horarios',
-        description: 'Portal de gestión de horarios para promotores',
+        name: 'Horarios Equipo FF',
+        short_name: 'Equipo FF',
+        description: 'Portal de gestión de horarios - Equipo FF',
         theme_color: '#111111',
         background_color: '#111111',
         display: 'standalone',

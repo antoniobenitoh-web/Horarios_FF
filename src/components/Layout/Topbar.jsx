@@ -120,8 +120,8 @@ export default function Topbar() {
           <CalendarDays size={22} color="white" />
         </div>
         <div className={styles.brandGroup}>
-          <h2 className={styles.brandTitle}>Portal Promotores</h2>
-          <span className={styles.brandSub}>Xiaomi · Salesland</span>
+          <h2 className={styles.brandTitle}>Horarios Equipo FF</h2>
+          <span className={styles.brandSub}>Gestión de Turnos</span>
         </div>
       </div>
 
@@ -146,17 +146,10 @@ export default function Topbar() {
         )}
 
         {user.role !== 'trainer' && (
-          <>
-            <NavLink to="/solicitudes" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
-              <CalendarClock size={18} />
-              <span>Solicitudes</span>
-            </NavLink>
-
-            <NavLink to="/horas" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
-              <Clock size={18} />
-              <span>Control Horas</span>
-            </NavLink>
-          </>
+          <NavLink to="/horas" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
+            <Clock size={18} />
+            <span>Control Horas</span>
+          </NavLink>
         )}
 
         {(user.role === 'am' || user.role === 'coordinadora' || user.role === 'project') && (
