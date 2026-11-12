@@ -1,0 +1,558 @@
+/* Cobertura de Centros - Estilos Corporativos */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pageTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--salesland-primary);
+  font-size: 1.45rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.pageSub {
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+}
+
+/* Barra de control superior: Mes y Filtros */
+.controlBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.monthPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-primary);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--border-radius-full);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.navArrowBtn {
+  background: transparent;
+  border: none;
+  color: var(--salesland-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.navArrowBtn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.navArrowBtn:disabled {
+  color: rgba(0, 0, 0, 0.2);
+  cursor: not-allowed;
+}
+
+.monthPillText {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--salesland-primary);
+  min-width: 140px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.filtersGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.filterSelect {
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: #ffffff;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  min-width: 150px;
+}
+
+.filterSelect:focus {
+  border-color: var(--salesland-primary);
+}
+
+.searchInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 180px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.65rem;
+  color: var(--text-tertiary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.45rem 0.75rem 0.45rem 2rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: #ffffff;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.searchInput:focus {
+  border-color: var(--salesland-primary);
+}
+
+/* Tarjetas resumen del mes */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  padding: 1.1rem 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--salesland-primary);
+  line-height: 1.1;
+}
+
+.statSub {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* Calendario Mensual de Cobertura */
+.calendarContainer {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.calendarHeader {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  text-align: center;
+}
+
+.calendarHeaderDay {
+  padding: 0.85rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendarGrid {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.calendarRow:last-child {
+  border-bottom: none;
+}
+
+.calendarCell {
+  min-height: 95px;
+  min-width: 0;
+  padding: 0.5rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  background: #ffffff;
+}
+
+.calendarCell:last-child {
+  border-right: none;
+}
+
+.calendarCell:hover {
+  background: rgba(0, 162, 172, 0.04);
+}
+
+.calendarCellActive {
+  background: rgba(0, 162, 172, 0.08) !important;
+  outline: 2px solid var(--salesland-primary);
+  outline-offset: -2px;
+  z-index: 2;
+}
+
+.emptyCell {
+  background: rgba(0, 0, 0, 0.02);
+  cursor: default;
+}
+
+.cellTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.cellDate {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.todayBadge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: var(--accent-primary);
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coverageBadge {
+  margin-top: 0.35rem;
+  border-radius: 8px;
+  padding: 0.45rem 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.coveragePct {
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.coverageRatio {
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Colores de Cobertura */
+.cov100 {
+  background: rgba(34, 197, 94, 0.14);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.covHigh {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0369a1;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.covMed {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.covLow {
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Panel de Desglose del Día Seleccionado */
+.detailSection {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding-bottom: 1rem;
+}
+
+.detailTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--salesland-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detailPills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detailTabBtn {
+  border: none;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--border-radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.detailTabBtnActive {
+  background: var(--salesland-primary);
+  color: #ffffff;
+}
+
+.centerCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1rem;
+}
+
+.centerCard {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.centerCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.centerCardCovered {
+  border-left: 4px solid #22c55e;
+}
+
+.centerCardUncovered {
+  border-left: 4px solid #ef4444;
+  background: #fffafa;
+}
+
+.centerTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.centerName {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.centerRegion {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.statusPill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--border-radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.statusCovered {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+}
+
+.statusUncovered {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+.promotoresList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 0.6rem;
+}
+
+.promotorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  gap: 0.5rem;
+}
+
+.promotorName {
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promotorShiftBadge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.shiftWorking {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0369a1;
+}
+
+.shiftOff {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+
+@media (max-width: 768px) {
+  .header {
+    gap: 0.5rem;
+  }
+
+  .controlBar {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .filtersGroup {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .filterSelect, .searchInputWrapper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .calendarHeaderDay {
+    padding: 0.5rem 0.1rem;
+    font-size: 0.65rem;
+  }
+
+  .calendarCell {
+    min-height: 75px;
+    padding: 0.35rem 0.15rem;
+  }
+
+  .cellDate {
+    font-size: 0.78rem;
+  }
+
+  .coveragePct {
+    font-size: 0.85rem;
+  }
+
+  .coverageRatio {
+    font-size: 0.58rem;
+    letter-spacing: -0.3px;
+  }
+
+  .centerCardsGrid {
+    grid-template-columns: 1fr;
+  }
+}

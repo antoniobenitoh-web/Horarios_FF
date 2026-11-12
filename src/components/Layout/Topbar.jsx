@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Layout.module.css';
-import { CalendarDays, CalendarClock, Clock, Users, Bell, LogOut, UserCircle, X, CheckCircle, AlertCircle, Info, Trash2, Eye, EyeOff, Save } from 'lucide-react';
+import { CalendarDays, CalendarClock, Clock, Users, Bell, LogOut, UserCircle, X, CheckCircle, AlertCircle, Info, Trash2, Eye, EyeOff, Save, ShieldCheck } from 'lucide-react';
 
 // Notificaciones dinámicas
 
@@ -160,9 +160,9 @@ export default function Topbar() {
             </NavLink>
 
             {(user.role === "gpv" || user.role === "am" || user.role === "coordinadora" || user.role === "administradora") && (
-              <NavLink to="/control-equipo" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
-                <Users size={18} />
-                <span>Control Equipo</span>
+              <NavLink to="/cobertura" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
+                <ShieldCheck size={18} />
+                <span>Cobertura</span>
               </NavLink>
             )}
           </>

@@ -7,7 +7,7 @@ import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Schedule from './pages/Schedule/Schedule';
 import ControlHoras from './pages/ControlHoras/ControlHoras';
-import ControlEquipo from './pages/ControlEquipo/ControlEquipo';
+import Cobertura from './pages/Cobertura/Cobertura';
 import Equipo from './pages/Equipo/Equipo';
 import UserManagement from './pages/Admin/UserManagement';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -65,7 +65,8 @@ function App() {
             <Route path="horario" element={<Schedule />} />
             <Route path="equipo" element={<ErrorBoundary><Equipo /></ErrorBoundary>} />
             <Route path="horas" element={<ErrorBoundary><ControlHoras /></ErrorBoundary>} />
-            <Route path="control-equipo" element={<ErrorBoundary><ControlEquipo /></ErrorBoundary>} />
+            <Route path="cobertura" element={<ErrorBoundary><Cobertura /></ErrorBoundary>} />
+            <Route path="control-equipo" element={<Navigate to="/cobertura" replace />} />
             <Route path="usuarios" element={<UserManagement />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

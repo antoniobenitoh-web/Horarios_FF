@@ -11,9 +11,10 @@ import {
   CheckCircle2, 
   ArrowRight,
   TrendingUp,
-  FileCheck
+  FileCheck,
+  ShieldCheck
 } from 'lucide-react';
-import { detectTurno, shiftConfig } from '../../utils/turnoUtils';
+import { detectTurno, shiftConfig, hasWorkingShift } from '../../utils/turnoUtils';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ export default function Dashboard() {
 
   const [nextShift, setNextShift] = useState({ data: null, loading: true });
   const [managerStats, setManagerStats] = useState({ teamSize: 0, loading: true });
+  const [todayCoverage, setTodayCoverage] = useState({ pct: 0, cubiertos: 0, total: 0, loading: true, color: 'var(--text-primary)' });
 
   useEffect(() => {
     const fetchNextShift = async () => {
@@ -121,6 +123,8 @@ export default function Dashboard() {
     const fetchManagerData = async () => {
       if ((user.role !== 'gpv' && user.role !== 'am' && user.role !== 'coordinadora' && user.role !== 'trainer' && user.role !== 'administradora') || !GAS_URL) return;
       try {
+        const roleToSend = user.role === 'administradora' ? 'project' : user.role;
+
         // Fetch usuarios
         const resUsers = await fetch(GAS_URL, {
           method: 'POST',
@@ -141,8 +145,76 @@ export default function Dashboard() {
         }
 
         setManagerStats({ teamSize: tSize, loading: false });
+
+        // Cobertura del día en curso (Hoy) para roles de gestión
+        if (user.role === 'gpv' || user.role === 'am' || user.role === 'coordinadora' || user.role === 'administradora') {
+          const today = new Date();
+          const yyyy = today.getFullYear();
+          const mm = String(today.getMonth() + 1).padStart(2, '0');
+          const dd = String(today.getDate()).padStart(2, '0');
+          const todayIso = `${yyyy}-${mm}-${dd}`;
+
+          const dUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+          const dayNum = dUtc.getUTCDay() || 7;
+          dUtc.setUTCDate(dUtc.getUTCDate() + 4 - dayNum);
+          const yearStart = new Date(Date.UTC(dUtc.getUTCFullYear(), 0, 1));
+          const currentWeekNum = Math.ceil((((dUtc - yearStart) / 86400000) + 1) / 7);
+
+          const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+          const currentMonthStr = `${mesesNombres[today.getMonth()]} ${yyyy}`;
+
+          const resWeekly = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'getEquipoWeekly',
+              month: currentMonthStr,
+              weekNum: currentWeekNum.toString(),
+              role: roleToSend,
+              name: user.name
+            })
+          });
+          const dataWeekly = await resWeekly.json();
+
+          if (dataWeekly.success && Array.isArray(dataWeekly.equipo)) {
+            const centrosMap = {};
+            for (const p of dataWeekly.equipo) {
+              if (!p.centro || p.centro === 'Sin asignar') continue;
+              if (!centrosMap[p.centro]) {
+                centrosMap[p.centro] = [];
+              }
+              centrosMap[p.centro].push(p);
+            }
+
+            const centros = Object.keys(centrosMap);
+            let cubiertos = 0;
+
+            for (const c of centros) {
+              const promos = centrosMap[c];
+              const isCovered = promos.some(pr => {
+                const dayShift = pr.semana?.find(s => s.fecha === todayIso);
+                return hasWorkingShift(dayShift?.horas, dayShift?.turno || dayShift?.iconTurno);
+              });
+              if (isCovered) cubiertos++;
+            }
+
+            const total = centros.length;
+            const pct = total > 0 ? Math.round((cubiertos / total) * 100) : 0;
+            const color = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+
+            setTodayCoverage({
+              pct,
+              cubiertos,
+              total,
+              loading: false,
+              color
+            });
+          } else {
+            setTodayCoverage(prev => ({ ...prev, loading: false }));
+          }
+        }
       } catch (err) {
         setManagerStats(prev => ({ ...prev, loading: false }));
+        setTodayCoverage(prev => ({ ...prev, loading: false }));
       }
     };
 
@@ -277,18 +349,27 @@ export default function Dashboard() {
           </div>
 
           {(user.role === 'gpv' || user.role === 'am' || user.role === 'coordinadora' || user.role === 'administradora') && (
-            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/control-equipo')}>
+            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/cobertura')}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(168,85,247,0.12)', borderRadius: '10px', color: '#a855f7' }}>
-                  <TrendingUp size={28} />
+                <div style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.12)', borderRadius: '10px', color: '#10b981' }}>
+                  <ShieldCheck size={28} />
                 </div>
                 <ArrowRight size={18} style={{ color: 'var(--text-tertiary)' }} />
               </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Control Equipo</p>
-              <p style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-                Métricas Generales
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Cobertura Hoy</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                <p style={{ fontSize: '1.6rem', fontWeight: '800', color: todayCoverage.color, margin: 0 }}>
+                  {todayCoverage.loading ? '...' : `${todayCoverage.pct}%`}
+                </p>
+                {!todayCoverage.loading && todayCoverage.total > 0 && (
+                  <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-secondary)' }}>
+                    ({todayCoverage.cubiertos}/{todayCoverage.total} centros)
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: 0 }}>
+                {todayCoverage.loading ? 'Calculando cobertura del día...' : `${todayCoverage.cubiertos} centros cubiertos hoy en tu zona`}
               </p>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Filtros por zona, tienda y estadísticas</p>
             </div>
           )}
         </div>

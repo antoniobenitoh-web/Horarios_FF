@@ -89,6 +89,42 @@ export function detectTurno(horas, turnoOriginal) {
   return 'Mañanas';
 }
 
+/**
+ * Determina si una asignación cuenta como turno efectivo de trabajo para cobertura.
+ * - Con horario (ej. 09:00-17:00, 10:00-14:00 / 17:00-21:00, 15:00-21:00) => true (hay cobertura)
+ * - Day off, Kickoff, Descanso, Vacaciones, Baja, Permiso, libre o sin horario => false (no hay cobertura)
+ */
+export function hasWorkingShift(horas, turno) {
+  if (!horas) return false;
+  const h = String(horas).trim().toLowerCase();
+  const t = String(turno || '').trim().toLowerCase();
+
+  if (
+    h === '' ||
+    h === '-' ||
+    h.includes('day off') ||
+    h.includes('dayoff') ||
+    h.includes('descanso') ||
+    h.includes('libre') ||
+    h.includes('kickoff') ||
+    h.includes('kick off') ||
+    h.includes('vacaciones') ||
+    h.includes('baja') ||
+    h.includes('permiso') ||
+    h.includes('sin turno') ||
+    t.includes('day off') ||
+    t.includes('kickoff') ||
+    t.includes('vacaciones') ||
+    t.includes('baja') ||
+    t.includes('permiso')
+  ) {
+    return false;
+  }
+
+  // Comprueba que contenga un formato de horario con dígitos (ej: 09:00 o 15:00-21:00)
+  return /\d{1,2}:\d{2}/.test(h);
+}
+
 export const shiftConfig = {
   'Mañanas': { 
     label: 'Mañanas',
