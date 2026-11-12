@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
-import { CalendarDays, KeyRound, User } from 'lucide-react';
+import { KeyRound, User } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -73,39 +73,7 @@ export default function Login() {
           </button>
         </form>
 
-        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: '0.6rem', textAlign: 'center', fontWeight: '500' }}>
-            Acceso Rápido (Cuentas Demo y Real)
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ fontSize: '0.75rem', padding: '0.45rem 0.5rem', borderRadius: '8px', gridColumn: '1 / -1', background: 'var(--accent-light)', borderColor: 'var(--accent-primary)', color: 'var(--salesland-primary)', fontWeight: '600' }}
-              onClick={() => { setUsername('antoniobenitoh@salesland.net'); setPassword('Antonio123'); }}
-            >
-              👑 Entrar como Antonio Benito (AM Real)
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ fontSize: '0.75rem', padding: '0.45rem 0.5rem', borderRadius: '8px' }}
-              onClick={() => { setUsername('juan'); setPassword('123'); }}
-            >
-              👤 Promotor Demo
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline"
-              style={{ fontSize: '0.75rem', padding: '0.45rem 0.5rem', borderRadius: '8px' }}
-              onClick={() => { setUsername('aliciamuruzabal@salesland.net'); setPassword('Alicia123'); }}
-            >
-              ⭐ Admin Real (Alicia)
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.footer} style={{ marginTop: '1rem', textAlign: 'center' }}>
+        <div className={styles.footer} style={{ marginTop: '1.5rem', textAlign: 'center' }}>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>¿Problemas para iniciar sesión? Contacta a tu responsable.</p>
         </div>
       </div>
