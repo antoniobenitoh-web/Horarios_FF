@@ -1,154 +1,255 @@
-.loginContainer {
-  min-height: 100vh;
+/* Estilos corporativos pantalla de Login (Salesland + Xiaomi) */
+
+.loginWrapper {
+  width: 100%;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--salesland-primary);
-  padding: 1rem;
-  position: relative;
-  overflow: hidden;
+  padding: 0;
+  background: linear-gradient(180deg, #041d27 0%, #07303e 50%, #031720 100%);
+  font-family: inherit;
 }
 
-.loginContainer::before {
-  content: '';
-  position: absolute;
-  top: -40%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(9, 67, 89, 0.08) 0%, transparent 70%);
-  pointer-events: none;
+@media (min-width: 640px) {
+  .loginWrapper {
+    padding: 1.5rem;
+  }
 }
 
-.glassCard {
+.loginCard {
   width: 100%;
-  max-width: 420px;
-  background: var(--bg-secondary);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: var(--border-radius-lg);
-  padding: 2.5rem 2rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-  animation: slideUp 0.5s ease-out;
-  position: relative;
-  z-index: 1;
-  color: var(--text-primary);
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--accent-gradient);
-  box-shadow: 0 0 24px rgba(255, 103, 0, 0.4);
-  margin-bottom: 1rem;
-}
-
-.brandSubtitle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent-primary);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 0.25rem;
-}
-
-.header h1 {
-  font-size: 1.5rem;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.header p {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-.form {
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  justify-content: space-between;
+  padding: 1.5rem 1.75rem;
+  background: linear-gradient(180deg, #084859 0%, #09576a 50%, #036074 100%);
+  color: #ffffff;
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.inputWrapper {
+@media (min-width: 640px) {
+  .loginCard {
+    height: auto;
+    min-height: 620px;
+    max-height: min(740px, 90vh);
+    max-width: 410px;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    padding: 2rem;
+  }
+}
+
+/* Ondas decorativas de fondo vectoriales */
+.wavesContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  user-select: none;
+  z-index: 1;
+}
+
+.waveSvg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 1. Cabecera con logos */
+.headerLogos {
   position: relative;
+  z-index: 10;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
 }
 
-.inputIcon {
-  position: absolute;
-  left: 1rem;
-  color: var(--text-tertiary);
+.saleslandLogoImg {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
-.inputWrapper input {
+.logoRightGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoDivider {
+  height: 28px;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.xiaomiLogoBox {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.xiaomiLogoImg {
   width: 100%;
-  padding-left: 2.75rem;
-  background-color: var(--bg-tertiary);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: var(--text-primary);
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.inputWrapper input:focus {
+/* 2. Sección central informativa */
+.centerContent {
+  position: relative;
+  z-index: 10;
+  margin: auto 0;
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.title {
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13.5px;
+  line-height: 1.5;
+  max-width: 290px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* 3. Formulario de acceso */
+.form {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+}
+
+.inputGroup {
+  width: 100%;
   background-color: #ffffff;
-  border-color: var(--salesland-primary);
+  color: #1e293b;
+  border-radius: 16px;
+  min-height: 52px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.inputWrapper input::placeholder {
-  color: var(--text-tertiary);
+.inputGroup:focus-within {
+  box-shadow: 0 0 0 2px #00c4cc, 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.inputInner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.inputField {
+  width: 100%;
+  background: transparent;
+  color: #1e293b;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+}
+
+.inputField::placeholder {
+  color: #94a3b8;
+}
+
+.eyeButton {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.eyeButton:hover {
+  color: #334155;
+}
+
+.errorAlert {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fecdd3;
+  background-color: rgba(76, 5, 25, 0.65);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  padding: 6px 12px;
+  border-radius: 12px;
+  text-align: center;
+  margin: 0;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .submitBtn {
   width: 100%;
-  padding: 0.8rem;
-  margin-top: 0.5rem;
-  font-size: 1rem;
-  background: var(--salesland-primary);
-  box-shadow: 0 4px 15px var(--salesland-light);
-  transition: all var(--transition-fast);
-  color: #fff;
+  background-color: #00a2ac;
+  color: #ffffff;
+  border-radius: 16px;
+  min-height: 52px;
+  font-weight: 800;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 162, 172, 0.35);
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  margin-top: 0.25rem;
+  font-family: inherit;
 }
 
 .submitBtn:hover {
-  box-shadow: 0 6px 20px var(--salesland-light);
-  transform: translateY(-1px);
-  background: var(--salesland-hover);
+  background-color: #008992;
+  box-shadow: 0 8px 25px rgba(0, 162, 172, 0.45);
 }
 
-.errorAlert {
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: var(--danger);
-  padding: 0.75rem 1rem;
-  border-radius: var(--border-radius-md);
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-tertiary);
+.submitBtn:active {
+  transform: scale(0.98);
 }
